@@ -2,20 +2,19 @@
 #Preco c/d| Preco ao lt c/d| Preco s/d| preco ao lt s/d|
 #-4 -> remove \n \r ' and ]
 
-import codecs
+import codecs;
 
 def getproducts() -> list:
     with codecs.open('bebidas2.db', 'r', encoding='utf-8', errors='ignore') as f:
         prods : list = f.readlines();
-    return prods
+    return prods;
 
-def discount(l) -> list:
-    print(len(l));
+def discount_by_percentage(l) -> list:
     dscs : list = [];
     i : int;
     for i in range(len(l)):
-        prod   : list = l[i][2:-4].split(',');
-        desc   : str = prod[-1];
+        prod : list = l[i][2:-4].split(',');
+        desc : str  = prod[-1];
         if ('%' in desc):
             desc : int = desc.replace('Desconto imediato:', '').replace('%', '').replace(' ', '');
             dscs.append(int(desc));
@@ -23,21 +22,82 @@ def discount(l) -> list:
             dscs.append(1);
     return dscs;
 
-def maxdiscount(dscs)-> str:
+def discount_by_money(l) -> list:
+    dscs : list = [];
+    print(len(l));
+    i : int;
+    for i in range(len(l)):
+        prod : list = l[i][2:-4].split(',');
+        desc : str = prod[-1];
+        if ('%' not in desc):
+            desc : float = desc.replace('Desconto imediato:', '').replace(' ', '');
+            dscs.append(float(desc));
+        else:
+            dscs.append(0);
+    return dscs;
+
+def discount_by_subtraction(l) -> list:
+    dscs : list = [];
+    i : int;
+    for i in range(len(l)):
+        prod : list = l[i][2:-4].split(',');
+        desc : str = prod[-1];
+        if ('%' in desc):
+            desc : int = desc.replace('Desconto imediato:', '').replace('%', '').replace(' ', '');
+            ctm : float = '0.{}'.format(desc);
+            #print(i, ctm)
+            ctm : float = (float(prod[-3].replace('\n', '').replace('/kg', ''))) * float(ctm);
+            #print(i, ctm)
+            dscs.append(float(ctm));
+        else:
+            desc : float = desc.replace('Desconto imediato:', '').replace(' ', '');
+            dscs.append(float(desc));
+    return dscs;
+            
+            
+#8424    
+    
+
+def maxdiscount(dscs, l)-> str:
     maior_desc : int = max(dscs);
-    print(len(dscs))
-    print(dscs)
     n : int = dscs.index(maior_desc);
     prodp : list = l[n][2:-4].split(',');
     descp = prodp[-1];
-    pp : str  = 'linha = {}, produto = {}, preço = {}, desconto = {}'.format(n, prodp[0], prodp[3], descp);
+    pp : str  = 'linha = {}, produto = {}, preço = {}, desconto = {}'.format(n, prodp[0], prodp[2], descp);
     return pp;
+
+def betterten(dscs, l) -> list:
+    melhores : list = [];
+    i : int;
+    for i in range(10):
+        maior_desc : int = max(dscs);
+        n : int = dscs.index(maior_desc);
+        prodp : list = l[n][2:-4].split(',');
+        descp = prodp[-1];
+        pp : str  = 'linha = {}, produto = {}, preço = {}, desconto = {}'.format(n, prodp[0], prodp[-5], descp);
+        melhores.append([pp]);
+        del dscs[n];
+    return melhores;
+        
         
 
 l : list = getproducts();
-m : str  = discount(l);
-print(m)
 
+m : list = discount_by_percentage(l);
+f : list = discount_by_money(l);
+p : list = discount_by_subtraction(l);
+
+k : str  = maxdiscount(m, l);
+r : str = maxdiscount(f, l);
+u : str = maxdiscount(p, l);
+g : list = betterten(p, l);
+print(r);
+print(k);
+print(u);
+print('----');
+print(g);
+for i in range(len(g)):
+    print('{}\n'.format(g[i]))
 
 
 
